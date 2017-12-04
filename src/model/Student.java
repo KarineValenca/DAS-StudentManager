@@ -1,3 +1,4 @@
+// Classe abastrata, modelo de implementação do estudante. 
 package model;
 
 import java.lang.reflect.Field;
@@ -9,10 +10,15 @@ public abstract class Student {
 	Date birthDate;
 	String gender;
 	
-	public Student() {
-		super();
-	}
-	
+	// Assinatura do construtor
+	public Student(int cpf, String name, Date birthDate, String gender){
+        super();
+        this.cpf = cpf;
+        this.name = name;
+        this.birthDate = birthDate;
+        this.gender = gender;
+    }
+
 	public int getCpf() {
 		return cpf;
 	}
