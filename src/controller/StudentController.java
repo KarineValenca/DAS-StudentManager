@@ -16,14 +16,12 @@ public abstract class StudentController {
 	
 	// Encontra estudantes com base no seu cpf.
 	public Student findStudent(int cpf) {
-		// testar, acho que tá errado
 		Student student = null;
 		for (Student students: studentList) {
 			if(students.getCpf() == cpf) {
 				student = students;
 			} else {
 				System.out.println("Estudante nao existe!");
-				return null;
 			}
 		}
 		return student;
@@ -54,7 +52,6 @@ public abstract class StudentController {
 		for (Student student : studentList) {
 			System.out.println("CPF:" + student.getCpf());
 			System.out.println("Nome:" + student.getName());
-			System.out.println("Data Nascimento:" + student.getBirthDate());
 			System.out.println("Gênero:" + student.getGender());
 		}
 	}

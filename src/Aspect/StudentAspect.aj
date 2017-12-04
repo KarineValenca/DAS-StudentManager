@@ -1,115 +1,78 @@
-
 package Aspect;
 
 import model.Student;
 
-public aspect StudentAspecto extends Object
-{
-	/*
-	 *  Pointcuts
-	 */
+public aspect StudentAspecto extends Object {
 	
-    pointcut construtor(int cpf, String name, Date birthDate, String gender) : execution(Model.Student.new(int, String, Date, String)) && args(cpf, name, birthDate, gender);
-    pointcut funcaoadd(double amount) : call(* *.deposit(double)) && args(amount);
-    pointcut funcaoeditar(double amount) : call(* *.withDraw(double)) && args(amount);
-    pointcut funcaoremover(double amount) : call(* *.withDraw(double)) && args(amount);
-    pointcut funcaolistar(double amount) : call(* *.withDraw(double)) && args(amount);
-    pointcut funcaobuscar(double amount) : call(* *.withDraw(double)) && args(amount);
-
-    /*
-     *  Advices
-     */
+    pointcut construtor(int cpf, String name, String gender) : execution(Model.Student.new(int, String, String)) && args(cpf, name, gender);
+    pointcut addStudent(Student student) : call(* *.addStudent(Student)) && args(student);
+    pointcut findStudent(int cpf) : call(* *.findStudent(int)) && args(cpf);
+    pointcut editStudent(int cpf, String attribute, String value) : call(* *.editStudent(int, String, String)) && args(cpf, attribute, value);
+    pointcut removeStudent(int cpf) : call(* *.removeStudent(int)) && args(cpf);
     
-    before(int cpf, String name, Date birthDate, String gender) : construtor(cpf, name, birthDate, gender)
+    before(int cpf, String name, String gender) : construtor(cpf, name, gender)
     {
-        Boolean sentinela = false;       
+        Boolean sentinel = false;
 
-        //continuar aqui...... 
-
-    	if(cpf.contains("^[a-Z]") || (cpf.length != 9)) {
-        	this.manipulaErro("O cpf deve conter apenas números, e nove caracteres",false);
-            sentinela = true;
+    	if(cpf.contains("^[a-Z]") || (cpf.length != 11)) {
+        	this.handleError("O cpf deve conter apenas números, e onze caracteres",false);
+            sentinel = true;
+    	}
+    	if(name.contains("[0-9]*")) {
+    		this.handleError("O nome deve conter apenas letras", false);
+            sentinel = true;
+    	}
+    	if(gender.contains("[0-9]*")) { 
+    		this.handleError("O gênero deve conter apenas letras", false);
+    		sentinel = true;
     	}
 
-       .
-       .
-       .
-
-    }
-
-
-    before(double amount) : funcaodeposit(amount)
-    {
-        if(amount < 0.0)
-        {
-            this.manipulaErro("Na chamada do método \"deposit\" da classe \"" + thisJoinPoint.getTarget().getClass().getName() + "\" o parâmetro \"amount\" está negativo (" + amount + ")",true);
+        if(sentinel) {
+            this.terminatedProgram();
         }
     }
 
-
-    before(double amount) : funcaowithDraw(amount)
-    {
-        BankAccount conta = (BankAccount)thisJoinPoint.getTarget();
-        double saldo;
-        if(amount < 0.0)
+    before(Student student) : addStudent(student){
+        if(student == null)
         {
-            this.manipulaErro("Na chamada do método \"withDraw\" da classe \"" + thisJoinPoint.getTarget().getClass().getName() + "\" o parâmetro \"amount\" está negativo (" + amount + ")",true);
-        }
-        if(conta instanceof RegularAccount)
-        {
-            saldo = ((RegularAccount)conta).getBalance();
-            if(!this.verificaSaque(saldo,amount))
-            {
-                this.manipulaErro("Na chamada do método \"withDraw\" da classe \"RegularAccount\" o parâmetro \"amount\" que tem  (" + amount + ") está maior que o saldo permitido que é de (" + saldo + ")",true);
-            }
-        }
-        else if(conta instanceof SavingsAccount)
-        {
-            saldo = ((SavingsAccount)conta).getBalance();
-            if(!this.verificaSaque(saldo,amount))
-            {
-                this.manipulaErro("Na chamada do método \"withDraw\" da classe \"SavingsAccount\" o parâmetro \"amount\" que tem (" + amount + ") está maior que o saldo permitido que é de (" + saldo + ")",true);
-            }
-        }
-        else if(conta instanceof LawAccount ||
-                conta instanceof CityLawAccount ||
-                conta instanceof StateLawAccount ||
-                conta instanceof FederationLawAccount)
-        {
-            saldo = ((LawAccount)conta).getBalance();
-            if(!this.verificaSaque(saldo,amount))
-            {
-                this.manipulaErro("Na chamada do método \"withDraw\" da classe \"" + thisJoinPoint.getTarget().getClass().getName() + "\" o parâmetro \"amount\" que tem (" + amount + ") está maior que o saldo permitido que é de (" + saldo + ")",true);
-            }
+            this.handleError("O estudante é nulo. Não é possível adicioná-lo", true);
         }
     }
 
-    /*
-     *  Métodos
-     */
+    before(int cpf) : findStudent(cpf){
+        if(cpf.contains("^[a-Z]") || (cpf.length != 11)) {
+        	this.handleError("O cpf deve conter apenas números, e onze caracteres",true);
+    	}
+    }
+    
+    before(int cpf, String attribute, String value) : editStudent(cpf, attribute, value){
+        if(cpf.contains("^[a-Z]") || (cpf.length != 11)) {
+        	this.handleError("O cpf deve conter apenas números, e onze caracteres",true);
+    	}
+    	if(attribute != "cpf" || attribute != "name" || attribute != "gender"){
+    		this.handleError("Atributo inválido!",true);
+    	}
+    	if(value == ""){
+    		this.handleError("Valor inválido", true);
+    	}
+    }
 
-    // Termina a execução do programa
-    private void terminaPrograma()
-    {
-    	System.err.println("Programa Finalizando sua Execução");
+	before(int cpf) : removeStudent(cpf){
+        if(cpf.contains("^[a-Z]") || (cpf.length != 11)) {
+        	this.handleError("O cpf deve conter apenas números, e onze caracteres",true);
+    	}
+    }
+  
+    private void terminatedProgram() {
+    	System.err.println("Finalizando Programa");
         System.exit(-1);
     }
 
-    // Lida com erros terminando ou não a execução do programa
-    private void manipulaErro(String message, Boolean sentinela)
-    {
+    private void handleError(String message, Boolean sentinel) {
         System.err.println(message);
-        if(sentinela)
-        {
-            this.terminaPrograma();
+        if(sentinel) {
+            this.terminatedProgram();
         }
     }
 
-    /*
-     * Verifica se a operação de saque pode ser feita
-     */
-    private Boolean verificaSaque(double saldo, double quantia)
-    {
-        return saldo - quantia >= 0.0;
-    }
 }

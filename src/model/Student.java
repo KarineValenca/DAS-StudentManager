@@ -7,15 +7,13 @@ import java.util.Date;
 public abstract class Student {
 	int cpf;
 	String name;
-	Date birthDate;
 	String gender;
 	
 	// Assinatura do construtor
-	public Student(int cpf, String name, Date birthDate, String gender){
+	public Student(int cpf, String name, String gender){
         super();
         this.cpf = cpf;
         this.name = name;
-        this.birthDate = birthDate;
         this.gender = gender;
     }
 
@@ -30,12 +28,6 @@ public abstract class Student {
 	}
 	public void setName(String name) {
 		this.name = name;
-	}
-	public Date getBirthDate() {
-		return birthDate;
-	}
-	public void setBirthDate(Date birthDate) {
-		this.birthDate = birthDate;
 	}
 	public String getGender() {
 		return gender;
